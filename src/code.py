@@ -1,0 +1,96 @@
+import board
+import busio
+import random
+import time
+import gc
+from conf.application_configuration import configuration as config
+from splatschedule.splat_schedule import SplatSchedule
+from splatschedule.wifi import WiFi
+from splatschedule.time_sync import TimeSync
+from splatschedule.touch import Touch
+from splatschedule.display import Display
+from splatschedule.storage import Storage
+from splatschedule.text import Text
+from splatschedule.background_randomizer import BackgroundRandomizer
+from splatschedule.turntable import Turntable, FakeTurntable
+
+debug = config['debug']
+
+# initializing
+turn_table = Turntable(debug=debug) if config['enable_turntable'] else FakeTurntable(debug=debug)
+spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+display = Display()
+wifi = None if config['disable_wifi'] else WiFi(spi, debug=debug)
+time_sync = TimeSync(wifi)
+storage = Storage(config['sd_mount_directory'], spi)
+backgrounds = BackgroundRandomizer(display, config['background_images_directory'], config['background_timeout'], debug)
+text = Text(display.splash, debug=debug)
+touch = Touch(config['touchscreen_touch_throttle'])
+current_time = time.time()
+schedule_change_timeout = config['schedule_change_timeout']
+schedule_time_set = current_time
+schedule_changed = False
+schedule = SplatSchedule(config['schedule_refresh'], wifi, debug)
+point = None
+last_time_check = current_time
+
+# the initial display of schedule
+schedule.set_current_battle(current_time)
+text.print_battle_schedule(schedule.get_current_battle())
+schedule.set_current_salmon(current_time)
+text.print_salmon_schedule(schedule.get_current_salmon())
+
+while True:
+    # gc.collect() hack seen in the adafruit forum to help clean up memory fragmentation
+    # would get random MemoryError: memory allocation failed even though gc.mem_free()
+    # showed over 100k when first running
+    gc.collect()
+    time_sync.update()
+    turn_table.update()
+    backgrounds.update()
+    schedule.update()
+    current_time = time.time()
+
+    # check to see if need to page forward/back through schedule if the user touched the screen
+    point = touch.touch_point()
+    if point is not None:
+        turn_table.turn_in()
+        x, y, z = point
+        schedule_time_set = current_time
+        schedule_changed = True
+        if debug:
+            print("touched: ({0}, {1})".format(x, y))
+        if y < 190:
+            if x >= 160:
+                text.print_battle_schedule(schedule.get_next_battle())
+            else:
+                text.print_battle_schedule(schedule.get_previous_battle())
+        else:
+            if x >= 160:
+                text.print_salmon_schedule(schedule.get_next_salmon())
+            else:
+                text.print_salmon_schedule(schedule.get_previous_salmon())
+
+    # change the displayed schedule back to the current schedule if the user changed
+    if schedule_changed and (current_time - schedule_time_set > schedule_change_timeout):
+        turn_table.turn_in()
+        schedule.set_current_battle(current_time)
+        text.print_battle_schedule(schedule.get_current_battle())
+        schedule.set_current_salmon(current_time)
+        text.print_salmon_schedule(schedule.get_current_salmon())
+        schedule_time_set = current_time
+        schedule_changed = False
+
+    # checking the time every minute to see if need to update displayed schedule
+    if not schedule_changed and current_time - last_time_check > 60:
+        last_time_check = current_time
+        displayed_battle = schedule.get_current_battle()
+        displayed_salmon = schedule.get_current_salmon()
+        if current_time > displayed_battle['end_time']:
+            turn_table.turn_in()
+            schedule.set_current_battle(current_time)
+            text.print_battle_schedule(schedule.get_current_battle())
+        if current_time > displayed_salmon['end_time']:
+            turn_table.turn_in()
+            schedule.set_current_salmon(current_time)
+            text.print_salmon_schedule(schedule.get_current_salmon())
