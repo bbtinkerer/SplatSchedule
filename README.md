@@ -10,9 +10,11 @@ Requires an Adafruit IO Account (https://io.adafruit.com/) for setting time.
 
 Optional simple Amiibo animaltronics just for some hardware motion fun.
 
-Instructables project at TBA
+Instructables project at https://www.instructables.com/id/PyPortal-Splatoon-2-Schedule-Display
 
-3D Files will be on Thingiverse.com
+3D Files on Thingiverse.com, https://www.thingiverse.com/thing:3662274
+
+Youtube video, https://youtu.be/n4F4rq-JXKI
 
 ## Dependencies
 
