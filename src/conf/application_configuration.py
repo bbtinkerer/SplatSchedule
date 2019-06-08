@@ -2,7 +2,7 @@ configuration = {
     'battle_schedule_url': 'https://splatoon2.ink/data/schedules.json',
     'salmon_schedule_url': 'https://splatoon2.ink/data/coop-schedules.json',
     
-    'time_service': "http://192.168.1.70:8080/data/time.txt?x-aio-key=%s&%s",
+    'time_service': 'https://io.adafruit.com/api/v2/%s/integrations/time/strftime?x-aio-key=%s',
     'time_service_strftime': '&fmt=%25Y-%25m-%25d+%25H%3A%25M%3A%25S.%25L+%25j+%25u+%25z+%25Z',
     # Adafruit IO strftime is %Y-%m-%d %H:%M:%S.%L %j %u %z %Z see http://strftime.net/ for decoding details
     # See https://apidock.com/ruby/DateTime/strftime for full options
