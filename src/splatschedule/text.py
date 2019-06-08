@@ -81,6 +81,7 @@ class Text:
             print("end _initialize_text")
 
     def _update_battle_texts(self, slot):
+        self.clear_battle_text()
         self._texts['text_battle_time_slot']._update_text(slot.time_slot)
         self._texts['text_battle_regular_stage_a']._update_text(slot.regular_stage_a)
         self._texts['text_battle_regular_stage_b']._update_text(slot.regular_stage_b)
@@ -89,6 +90,7 @@ class Text:
         self._texts['text_battle_ranked_stage_b']._update_text(slot.ranked_stage_b)
 
     def _update_salmon_texts(self, slot):
+        self.clear_salmon_text()
         self._texts['text_salmon_time_slot']._update_text(slot.time_slot)
         self._texts['text_salmon_stage']._update_text(slot.stage)
 
@@ -99,11 +101,18 @@ class Text:
         self._update_salmon_texts(schedule)
 
     def clear(self):
+        self.clear_battle_text()
+        self.clear_salmon_text()
+
+    def clear_battle_text(self):
         self._texts['text_battle_time_slot']._update_text('')
         self._texts['text_battle_regular_stage_a']._update_text('')
         self._texts['text_battle_regular_stage_b']._update_text('')
         self._texts['text_battle_ranked_rule_name']._update_text('')
         self._texts['text_battle_ranked_stage_a']._update_text('')
         self._texts['text_battle_ranked_stage_b']._update_text('')
+
+    def clear_salmon_text(self):
         self._texts['text_salmon_time_slot']._update_text('')
         self._texts['text_salmon_stage']._update_text('')
+
