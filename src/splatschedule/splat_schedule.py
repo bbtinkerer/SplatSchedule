@@ -93,8 +93,9 @@ class SplatSchedule:
                 time.sleep(30)
                 retries = retries - 1
         if not success:
-            import supervisor
-            supervisor.reload()
+            # import supervisor
+            # supervisor.reload()
+            raise RuntimeError('could not update')
 
     def _populate_battle_schedule_from_file(self):
         file = open(self._test_battle_schedule_file)
@@ -223,11 +224,9 @@ class SplatSchedule:
         return self.get_current_salmon()
 
     def set_current_salmon(self, time):
-        self._current_salmon_index = 0
         for i in range(SALMON_SLOTS_COUNT):
+            self._current_salmon_index = i
             slot = self._salmon_schedules[i]
-            start_time = slot.start_time
             end_time = slot.end_time
-            if start_time <= time and time < end_time:
-                self._current_salmon_index = i
+            if time < end_time:
                 return
