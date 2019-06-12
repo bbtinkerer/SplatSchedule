@@ -47,7 +47,7 @@ class TimeSync:
             response_text = self._wifi.get_url_response_text(api_url)
             if self._debug:
                 print("Time request: ", api_url)
-                print("Time reply: ", response.text)
+                print("Time reply: ", response_text)
             times = response_text.split(' ')
             the_date = times[0]
             the_time = times[1]
